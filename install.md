@@ -116,13 +116,15 @@ cp image-vision/SKILL.md ~/.claude/skills/image-vision/SKILL.md
 支持完整功能：`AskUserQuestion` 填空配置、Bash 执行脚本、CLAUDE.md 全局指令。
 
 ### Codex（OpenAI Codex CLI）
-若你的 Codex 版本支持 skills 目录，按对应目录复制 `SKILL.md`；否则使用通用兜底：在全局 `AGENTS.md` 中追加：
+Codex 无 SKILL.md 机制，使用全局指令文件兜底。在 `~/.codex/AGENTS.md` 中追加：
 
 ```markdown
 当用户上传/引用图片且你无法直接查看图片时，运行：
 python ~/.config/image-vision/vision.py "<图片路径>" -q "<用户问题>"
 并以脚本输出回答用户。
 ```
+
+注意：Codex 无结构化填空工具，配置参数时直接在回复中列出 `base_url` / `api_key` / `model` 请用户回复。
 
 ### Z.ai zcode CLI
 ```bash

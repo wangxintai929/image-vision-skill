@@ -41,7 +41,7 @@ description: 当用户上传、粘贴或引用图片（截图、照片、报错�
      - `api_key`：API 密钥（`sk-...`）
      - `model`：视觉模型名称，如 `gpt-4o`
    - **Claude Code / zcode**：调用 `AskUserQuestion` 工具，同样一次提出上述三个问题（不超过工具的问题上限），每题启用自由输入（Other）供用户填写。
-   - **其他平台（Codex 等，无填空工具）**：直接在回复中列出上述三项，请用户一次性回复（如"base_url 填 xxx，api_key 填 xxx，model 填 xxx"），然后继续。
+   - **Codex（无填空工具）**：直接在回复中列出上述三项，请用户一次性回复（如"base_url 填 xxx，api_key 填 xxx，model 填 xxx"），然后继续。
 2. **确定配置文件路径**（按顺序选第一个可写的）：
    - `~/.config/image-vision/config.json`（Windows 为 `%USERPROFILE%\.config\image-vision\config.json`）
    - 本 skill 目录下的 `config.json`（远程加载场景）
