@@ -130,7 +130,7 @@ python ~/.config/image-vision/vision.py "a.png" "b.png" -q "两张图的区别�
 | opencode | `skills.urls` 远程加载，或复制到 `~/.config/opencode/skills/image-vision/` |
 | Claude Code | 复制到 `~/.claude/skills/image-vision/SKILL.md`（支持 AskUserQuestion 填空配置） |
 | Codex | 若支持 skills 目录则复制；否则在全局 `AGENTS.md` 追加"遇到图片运行 vision.py"指引 |
-| Z.ai zcode | 若支持 skills 目录则复制；否则在全局指令文件追加同上指引 |
+| Z.ai zcode | 复制到 `~/.zcode/skills/image-vision/SKILL.md` 或 `~/.agents/skills/`（不扫 ~/.claude/skills/；支持 AskUserQuestion 填空配置） |
 
 ## 验证
 

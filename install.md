@@ -125,7 +125,12 @@ python ~/.config/image-vision/vision.py "<图片路径>" -q "<用户问题>"
 ```
 
 ### Z.ai zcode CLI
-若 zcode 支持 skills 目录，同样复制 `SKILL.md`；否则在 zcode 的全局指令文件（参见 zcode 文档，通常是 AGENTS.md 类机制）中追加上述通用兜底指引。
+```bash
+mkdir -p ~/.zcode/skills
+cp image-vision/SKILL.md ~/.zcode/skills/image-vision/SKILL.md   # 或放入 ~/.agents/skills/（跨工具兼容目录）
+```
+
+注意：zcode **不扫描** `~/.claude/skills/`，必须放入上述目录。支持完整功能：`AskUserQuestion` 填空配置（上限 4 题）、Bash 执行脚本、全局指令文件为 `~/.zcode/AGENTS.md`（兜底指引追加到此处）。
 
 ## 六、验证
 
