@@ -135,7 +135,43 @@ cp image-vision/SKILL.md ~/.zcode/skills/image-vision/SKILL.md   # 或放入 ~/.
 
 注意：zcode **不扫描** `~/.claude/skills/`，必须放入上述目录。支持完整功能：`AskUserQuestion` 填空配置（上限 4 题）、Bash 执行脚本、全局指令文件为 `~/.zcode/AGENTS.md`（兜底指引追加到此处）。
 
-## 六、验证
+## 六、各平台免确认配置（可选）
+
+默认情况下，模型执行 `python vision.py ...` 会弹一次命令确认。以下配置可让该命令免确认（其余命令仍保持确认）：
+
+| 平台 | 配置文件 | 写法 | 生效方式 |
+|---|---|---|---|
+| opencode | `opencode.json` → `permission.bash` | glob 通配 `"*vision.py*": "allow"`，兜底 `"*": "ask"` 在前 | 重启生效 |
+| zcode | 同 opencode（`~/.config/opencode/opencode.jsonc`） | 同上，同一套配置 | 重启/新会话生效 |
+| Claude Code | `~/.claude/settings.json` → `permissions.allow` | `Bash(python:*vision.py*)` | 自动生效，无需重启 |
+| Codex | 无命令级白名单 | 每次手动确认（或全局 `approval_policy`，不安全，不建议） | — |
+
+**opencode / zcode**（`opencode.json`，规则按"最后匹配生效"，兜底在前、放行在后）：
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "*vision.py*": "allow"
+    }
+  }
+}
+```
+
+**Claude Code**（`~/.claude/settings.json`）：
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(python:*vision.py*)"],
+    "deny": []
+  }
+}
+```
+
+## 七、验证
 
 ```bash
 # 1. 配置检查
@@ -147,7 +183,7 @@ python ~/.config/image-vision/vision.py "C:\path\to\test.png" -q "图片里有�
 
 预期：`--check` 提示配置通过；识别测试在 stdout 输出图片内容的文字描述。
 
-## 七、常见问题
+## 八、常见问题
 
 - **缺少配置项**：通过对话提供 `base_url` / `api_key` / `model`，或手动编辑 `config.json`。
 - **无法连接**：检查网络与 `base_url` 是否正确（本地服务需先启动）。

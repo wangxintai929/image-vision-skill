@@ -132,6 +132,14 @@ python ~/.config/image-vision/vision.py "a.png" "b.png" -q "两张图的区别�
 | Codex | 无 SKILL.md 机制：在全局 `~/.codex/AGENTS.md` 追加"遇到图片运行 vision.py"指引（无填空工具，对话式提问） |
 | Z.ai zcode | 复制到 `~/.zcode/skills/image-vision/SKILL.md` 或 `~/.agents/skills/`（不扫 ~/.claude/skills/；支持 AskUserQuestion 填空配置） |
 
+### 命令免确认配置
+
+模型执行 `python vision.py ...` 默认会弹确认，可按平台放行（其余命令仍确认）：
+
+- **opencode / zcode**（`opencode.json` → `permission.bash`，兜底在前、放行在后）：`"*": "ask", "*vision.py*": "allow"`（重启生效）
+- **Claude Code**（`~/.claude/settings.json` → `permissions.allow`）：`"Bash(python:*vision.py*)"`（自动生效）
+- **Codex**：无命令级白名单，需手动确认
+
 ## 验证
 
 ```bash
