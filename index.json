@@ -2,7 +2,7 @@
   "skills": [
     {
       "name": "image-vision",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "files": ["SKILL.md", "vision.py", "config.example.json"]
     }
   ]
