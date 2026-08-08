@@ -62,7 +62,9 @@ cd image-vision-skill
 
 ## 配置
 
-首次使用需配置视觉模型参数，三项默认均为空，由你填写：
+> **推荐：通过对话配置。** 装好 skill 后，直接在对话中告诉模型三项参数即可（如"视觉模型用 OpenAI 的 gpt-4o，key 是 sk-xxx，base_url 是 https://api.openai.com/v1"），模型会自动写入 `config.json` 并验证。
+
+首次使用也可手动编辑配置，三项默认均为空，由你填写：
 
 ```bash
 cd ~/.config/image-vision

@@ -28,7 +28,19 @@ description: 当用户上传、粘贴或引用图片（截图、照片、报错�
    - 支持多张图片：在脚本后依次列出多个路径
    - 用户问题建议原样传入；若用户未提问题，可省略 `-q`，脚本使用默认问题"请详细描述这些图片的内容"
 4. **整合回答**：脚本 stdout 输出即图片识别文本。将其作为图片内容，结合用户问题给出完整回答。
-5. **配置缺失时**：脚本会提示缺少 `base_url` / `api_key` / `model` 等配置。此时不要编造图片内容，应告知用户需要先复制 `config.example.json` 为 `config.json` 并填写配置（详见 install.md），或设置环境变量 `VISION_BASE_URL` / `VISION_API_KEY` / `VISION_MODEL` / `VISION_CONFIG`。
+5. **配置缺失时**：脚本会提示缺少 `base_url` / `api_key` / `model` 等配置。此时不要编造图片内容，应引导用户通过对话提供配置（见下文"通过对话配置"），或提示设置环境变量 `VISION_BASE_URL` / `VISION_API_KEY` / `VISION_MODEL` / `VISION_CONFIG`。
+
+## 通过对话配置（无需手动编辑文件）
+
+当用户在对话中提供视觉模型参数（如"视觉模型用 OpenAI 的 gpt-4o，key 是 sk-xxx"）时，由你完成写入：
+
+1. **确定配置文件路径**（按顺序选第一个可写的）：
+   - `~/.config/image-vision/config.json`（Windows 为 `%USERPROFILE%\.config\image-vision\config.json`）
+   - 本 skill 目录下的 `config.json`（远程加载场景）
+   - 都不存在时：创建 `~/.config/image-vision/` 目录及 `config.json`（字段模板见同目录 `config.example.json`）
+2. **写入配置**：用编辑工具将用户提供的 `base_url` / `api_key` / `model` 写入该文件；已存在的其他字段（如 `timeout`）保留不动，用户未提供的字段不改。
+3. **验证**：运行 `python <脚本所在目录>/vision.py --check`，输出"配置检查通过"即完成。
+4. **告知用户**：API Key 会以明文保存在本机配置文件 `config.json` 中。
 
 ## 注意事项
 
