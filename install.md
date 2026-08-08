@@ -113,6 +113,8 @@ mkdir -p ~/.claude/skills
 cp image-vision/SKILL.md ~/.claude/skills/image-vision/SKILL.md
 ```
 
+支持完整功能：`AskUserQuestion` 填空配置、Bash 执行脚本、CLAUDE.md 全局指令。
+
 ### Codex（OpenAI Codex CLI）
 若你的 Codex 版本支持 skills 目录，按对应目录复制 `SKILL.md`；否则使用通用兜底：在全局 `AGENTS.md` 中追加：
 

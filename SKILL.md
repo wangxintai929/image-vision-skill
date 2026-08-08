@@ -29,18 +29,19 @@ description: 当用户上传、粘贴或引用图片（截图、照片、报错�
    - 支持多张图片：在脚本后依次列出多个路径
    - 用户问题建议原样传入；若用户未提问题，可省略 `-q`，脚本使用默认问题"请详细描述这些图片的内容"
 5. **直接回答，保持无感**：脚本 stdout 输出即图片识别文本。直接以结果回答用户，**不要输出"我调用视觉代理脚本""当前模型无法直接查看图片"之类的解释性文字**。仅当脚本本身失败（配置缺失、网络错误）时，才简洁转述错误信息。
-6. **配置缺失时**：脚本会提示缺少 `base_url` / `api_key` / `model` 等配置。此时不要编造图片内容，也不要让用户自行去编辑文件——直接按"通过对话配置"的流程发起提问（opencode 用 question 填空，其他平台直接列出三项），收集参数后写入并验证。配置只认 `config.json`，不读取其他环境变量。
+6. **配置缺失时**：脚本会提示缺少 `base_url` / `api_key` / `model` 等配置。此时不要编造图片内容，也不要让用户自行去编辑文件——直接按"通过对话配置"的流程发起提问（opencode 用 `question`、Claude Code 用 `AskUserQuestion`，其他平台直接列出三项），收集参数后写入并验证。配置只认 `config.json`，不读取其他环境变量。
 
 ## 通过对话配置（无需手动编辑文件）
 
 当需要视觉模型配置时（首次使用、脚本报缺少配置、用户询问如何配置），**主动发起提问**，不要等待用户自行说明：
 
-1. **发起提问**（二选一，取决于平台能力）：
-   - **若平台提供 question 工具（opencode）**：调用 question 工具，一次性提出三个问题，每项均允许用户自定义填写：
+1. **发起提问**（按平台选择工具）：
+   - **opencode**：调用 `question` 工具，一次性提出三个问题，每项均允许用户自定义填写：
      - `base_url`：API 基础地址，如 `https://api.openai.com/v1`
      - `api_key`：API 密钥（`sk-...`）
      - `model`：视觉模型名称，如 `gpt-4o`
-   - **其他平台（Claude Code / Codex / zcode 等，无 question 工具）**：直接在回复中列出上述三项，请用户一次性回复（如"base_url 填 xxx，api_key 填 xxx，model 填 xxx"），然后继续。
+   - **Claude Code**：调用 `AskUserQuestion` 工具，同样一次提出上述三个问题，每题启用自由输入（Other）供用户填写。
+   - **其他平台（Codex / zcode 等，无填空工具）**：直接在回复中列出上述三项，请用户一次性回复（如"base_url 填 xxx，api_key 填 xxx，model 填 xxx"），然后继续。
 2. **确定配置文件路径**（按顺序选第一个可写的）：
    - `~/.config/image-vision/config.json`（Windows 为 `%USERPROFILE%\.config\image-vision\config.json`）
    - 本 skill 目录下的 `config.json`（远程加载场景）
