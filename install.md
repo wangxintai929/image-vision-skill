@@ -2,7 +2,7 @@
 
 一个跨平台（opencode / Claude Code / Codex / Z.ai zcode）的图片识别 skill：当主模型不是多模态模型、无法直接查看图片时，自动调用视觉代理脚本，把图片交给任意 **OpenAI 兼容**视觉模型识别。
 
-- GitHub 仓库：`https://github.com/<你的GitHub用户名>/image-vision`
+- GitHub 仓库：`https://github.com/wangxintai929/image-vision-skill`
 - 依赖：Python 3.7+（脚本零第三方依赖）
 
 ## 一、目录结构
@@ -29,7 +29,7 @@ image-vision/
   "$schema": "https://opencode.ai/config.json",
   "skills": {
     "urls": [
-      "https://cdn.jsdelivr.net/gh/<你的GitHub用户名>/image-vision@main/"
+      "https://cdn.jsdelivr.net/gh/wangxintai929/image-vision-skill@main/"
     ]
   }
 }
@@ -42,7 +42,7 @@ image-vision/
 ### 方式二：git clone + 一键脚本（所有平台通用）
 
 ```bash
-git clone https://github.com/<你的GitHub用户名>/image-vision.git
+git clone https://github.com/wangxintai929/image-vision-skill.git
 cd image-vision
 ./install.sh          # macOS/Linux；Windows 用: powershell -ExecutionPolicy Bypass -File install.ps1
 ```
