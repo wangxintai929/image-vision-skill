@@ -82,7 +82,7 @@ cp config.example.json config.json
 | `timeout` | 请求超时（秒，默认 120） | `120` |
 | `user_agent` | 自定义 User-Agent（可选，个别服务需要） | 留空即可 |
 
-> 也可不写文件，改用环境变量 `VISION_BASE_URL` / `VISION_API_KEY` / `VISION_MODEL`（优先级高于 config.json）；`VISION_CONFIG` 可指定 config.json 的绝对路径。
+> 配置只读 `config.json` 一个文件（`VISION_CONFIG` 环境变量仅用于指定该文件位置，可选），不读取其他环境变量。
 
 ### 开箱即用示例：opencode-go（无需额外注册）
 
@@ -139,7 +139,7 @@ python ~/.config/image-vision/vision.py "C:\path\to\test.png" -q "图片里有�
 
 ## 七、常见问题
 
-- **缺少配置项**：按第四节补全 `config.json` 或设置环境变量。
+- **缺少配置项**：通过对话提供 `base_url` / `api_key` / `model`，或手动编辑 `config.json`。
 - **无法连接**：检查网络与 `base_url` 是否正确（本地服务需先启动）。
 - **HTTP 4xx**：多为密钥无效或模型名错误，按 API 返回的错误信息排查。
 - **换模型/换厂商**：改 `config.json` 三项即可，无需改任何代码。

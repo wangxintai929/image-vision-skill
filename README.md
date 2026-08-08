@@ -89,10 +89,7 @@ cp config.example.json config.json
 | `timeout` | 请求超时秒数（默认 120） | `120` |
 | `user_agent` | 自定义 User-Agent（可选，个别服务需要） | 留空 |
 
-也可不写文件，改用环境变量（优先级高于 `config.json`）：
-
-- `VISION_BASE_URL` / `VISION_API_KEY` / `VISION_MODEL`
-- `VISION_CONFIG`：指定配置文件绝对路径
+配置只读 `config.json` 一个文件，不读取环境变量；`VISION_CONFIG` 环境变量仅用于指定该文件的位置（可选）。
 
 ### 示例：opencode-go（无需额外注册）
 

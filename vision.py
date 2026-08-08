@@ -6,10 +6,9 @@
     python vision.py <图片路径> [<图片路径> ...] [-q "问题"]
     python vision.py --check    # 检查配置是否完整
 
-配置来源（优先级从高到低）:
-    1. 环境变量  VISION_BASE_URL / VISION_API_KEY / VISION_MODEL
-    2. 环境变量  VISION_CONFIG 指定的配置文件
-    3. 本目录下的 config.json（用户首次安装时填写，见 config.example.json）
+配置来源:
+    config.json（用户通过对话提供参数后，由模型写入；或用 VISION_CONFIG 环境变量指定其路径）
+    不支持环境变量直接覆盖配置项，配置一律以 config.json 为准。
 
 支持的提供商示例（任意 OpenAI 兼容服务均可）:
     OpenAI:            https://api.openai.com/v1
@@ -33,7 +32,7 @@ DEFAULT_QUESTION = "请详细描述这些图片的内容，包括所有可见的
 
 
 def load_config() -> dict:
-    """加载配置：config.json 为基础，环境变量优先覆盖。"""
+    """加载配置：仅读取 config.json（或 VISION_CONFIG 指定的文件）。"""
     config = {}
     if os.path.isfile(CONFIG_PATH):
         try:
@@ -43,9 +42,9 @@ def load_config() -> dict:
             print(f"错误：无法读取配置文件 {CONFIG_PATH}（{e}）", file=sys.stderr)
             sys.exit(1)
 
-    config["base_url"] = os.environ.get("VISION_BASE_URL", config.get("base_url", "")).strip()
-    config["api_key"] = os.environ.get("VISION_API_KEY", config.get("api_key", "")).strip()
-    config["model"] = os.environ.get("VISION_MODEL", config.get("model", "")).strip()
+    config["base_url"] = str(config.get("base_url", "")).strip()
+    config["api_key"] = str(config.get("api_key", "")).strip()
+    config["model"] = str(config.get("model", "")).strip()
     config["timeout"] = config.get("timeout", 120)
     return config
 
@@ -56,8 +55,8 @@ def check_config(config: dict) -> None:
     if missing:
         names = {"base_url": "API Base URL", "api_key": "API Key", "model": "模型名称"}
         print(f"错误：缺少配置项：{', '.join(names[k] for k in missing)}")
-        print(f"请编辑 {CONFIG_PATH} 补全后重试，或设置环境变量 "
-              "VISION_BASE_URL / VISION_API_KEY / VISION_MODEL")
+        print(f"请在对话中提供这三项参数（模型会自动写入 {CONFIG_PATH}），"
+              "或手动编辑该文件补全后重试")
         sys.exit(1)
 
 
