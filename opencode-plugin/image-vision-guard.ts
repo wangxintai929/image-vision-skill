@@ -3,8 +3,6 @@ import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
 
-const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg", ".ico"]
-
 const DEBUG_LOG = path.join(os.homedir(), ".config", "image-vision", "plugin-debug.log")
 
 function log(message: string): void {
@@ -15,54 +13,62 @@ function log(message: string): void {
   }
 }
 
-function isImagePath(filePath: string): boolean {
-  return IMAGE_EXTENSIONS.includes(path.extname(filePath).toLowerCase())
-}
-
 /**
  * image-vision 兜底插件（opencode）
  *
- * 当主模型不支持图片输入时，read 图片会失败（报错 "does not support image input"）。
- * 本插件拦截该失败：自动执行 vision.py 调用外部视觉模型识别图片，
- * 并把识别文本改写成 read 工具的输出——模型视角下 read "成功"，
- * 直接基于内容回答，全程无感，且不依赖模型是否遵守技能指令。
+ * 机制：在每次请求发给模型前，检查用户消息中的图片附件（type=file, mime=image/*），
+ * 把图片的本地路径和处置规则以文本形式注入用户消息——模型必然看到真实路径，
+ * 不会再自行搜索其他图片代替；路径不存在时则明确提醒用户先保存到本地。
+ * 该方案与模型是否遵守 SKILL.md 无关（指令注入在机制层完成）。
  */
-export default (async ({ $ }) => {
+export default (async () => {
   log("插件已加载")
   return {
-    "tool.execute.after": async (
-      input: { tool: string; args: any },
-      output: { title: string; output: string },
+    "experimental.chat.messages.transform": async (
+      _input: {},
+      output: {
+        messages: {
+          info: { role?: string }
+          parts: any[]
+        }[]
+      },
     ) => {
-      log(`hook 触发: tool=${input.tool} args=${JSON.stringify(input.args ?? {})} output=${(output.output || output.title || "").slice(0, 120)}`)
-      if (input.tool !== "read") return
+      // 从后向前找最新一条用户消息
+      for (let i = output.messages.length - 1; i >= 0; i--) {
+        const message = output.messages[i]
+        if (message.info.role !== "user") continue
 
-      const text = output.output || output.title || ""
-      if (!/does not support image input/i.test(text)) return
+        const imageParts = message.parts.filter(
+          (part) =>
+            part.type === "file" &&
+            typeof part.mime === "string" &&
+            part.mime.startsWith("image/"),
+        )
+        if (imageParts.length === 0) continue
 
-      const args = input.args ?? {}
-      const filePath =
-        typeof args.filePath === "string"
-          ? args.filePath
-          : typeof args.path === "string"
-            ? args.path
-            : undefined
-      if (!filePath || !isImagePath(filePath)) return
+        const paths = imageParts
+          .map((part) => (typeof part.filename === "string" ? part.filename : ""))
+          .filter((value) => value.length > 0)
+        if (paths.length === 0) continue
 
-      // 定位视觉代理脚本（统一安装目录 ~/.config/image-vision/vision.py）
-      const visionScript = path.join(os.homedir(), ".config", "image-vision", "vision.py")
+        const pathList = paths.join("、")
+        const injection =
+          `【系统注入·image-vision】检测到用户上传了 ${paths.length} 张图片，路径：${pathList}。` +
+          "当前模型不支持图片输入，必须遵守：1) 禁止用 read/编辑工具直接读取这些图片文件（会报错）；" +
+          `2) 若路径在本地存在，直接执行 python ~/.config/image-vision/vision.py ${paths.map((p) => `"${p}"`).join(" ")} -q "<用户问题原文>"，并以脚本输出作为图片内容回答用户，不做解释；` +
+          "3) 若某个路径在本地不存在（图片未保存到磁盘），明确提醒用户“请先将图片保存到本地（如桌面），保存后把路径发我”，禁止搜索或用其他图片代替。"
 
-      // 执行视觉识别（Windows/Linux/macOS 通用，使用默认问题）
-      const proc = await $`python ${visionScript} ${filePath}`.quiet().nothrow()
-      const stdout = proc.stdout?.toString("utf8")?.trim() || ""
-      const stderr = proc.stderr?.toString("utf8")?.trim() || ""
-      log(`vision.py 退出码=${proc.exitCode} stdout=${stdout.slice(0, 120)} stderr=${stderr.slice(0, 120)}`)
-
-      if (proc.exitCode === 0 && stdout) {
-        output.title = "图片识别结果（image-vision）"
-        output.output = stdout
-      } else {
-        output.output = `图片识别失败：${stderr || stdout || "vision.py 执行失败（请检查安装与配置）"}`
+        // 优先追加到用户消息的文本部分；无文本部分则新增一条
+        const textPart = message.parts.find(
+          (part) => part.type === "text" && typeof part.text === "string",
+        )
+        if (textPart) {
+          textPart.text += "\n\n" + injection
+        } else {
+          message.parts.push({ type: "text", text: injection, id: "image-vision-injection" })
+        }
+        log(`已注入图片路径: ${pathList}`)
+        break
       }
     },
   }
