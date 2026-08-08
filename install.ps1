@@ -33,14 +33,22 @@ New-Item -ItemType Directory -Path $OpencodeSkillDir -Force | Out-Null
 Copy-Item (Join-Path $SrcDir "SKILL.md") $OpencodeSkillDir -Force
 Write-Host "[opencode] SKILL.md 已安装到 $OpencodeSkillDir （重启 opencode 生效）"
 
-# 4. 安装 SKILL.md 到 Claude Code（如已安装）
+# 4. 安装 image-vision-guard 插件到 opencode（工具层面兜底：拦截 read 图片失败并自动识别）
+$PluginDir = Join-Path $UserHome ".config\opencode\plugin"
+New-Item -ItemType Directory -Path $PluginDir -Force | Out-Null
+if (Test-Path (Join-Path $SrcDir "opencode-plugin\image-vision-guard.ts")) {
+    Copy-Item (Join-Path $SrcDir "opencode-plugin\image-vision-guard.ts") $PluginDir -Force
+    Write-Host "[opencode] 兜底插件已安装到 $PluginDir"
+}
+
+# 5. 安装 SKILL.md 到 Claude Code（如已安装）
 if (Test-Path (Join-Path $UserHome ".claude")) {
     New-Item -ItemType Directory -Path $ClaudeSkillDir -Force | Out-Null
     Copy-Item (Join-Path $SrcDir "SKILL.md") $ClaudeSkillDir -Force
     Write-Host "[claude code] SKILL.md 已安装到 $ClaudeSkillDir"
 }
 
-# 5. 验证
+# 6. 验证
 Write-Host ""
 Write-Host "== 验证 =="
 python (Join-Path $DestDir "vision.py") --check
