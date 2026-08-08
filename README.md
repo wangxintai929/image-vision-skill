@@ -127,7 +127,7 @@ python ~/.config/image-vision/vision.py "a.png" "b.png" -q "两张图的区别�
 
 | 平台 | 安装方式 |
 |---|---|
-| opencode | `skills.urls` 远程加载，或复制到 `~/.config/opencode/skills/image-vision/`；另装兜底插件（`opencode-plugin/image-vision-guard.ts` → `~/.config/opencode/plugin/`），工具层面拦截 read 图片失败并自动识别，不依赖模型自觉 |
+| opencode | `skills.urls` 远程加载，或复制到 `~/.config/opencode/skills/image-vision/`；另装兜底插件（`plugin/image-vision-guard.ts` → `~/.config/opencode/plugin/`），工具层面拦截 read 图片失败并自动识别，不依赖模型自觉 |
 | Claude Code | 复制到 `~/.claude/skills/image-vision/SKILL.md`（支持 AskUserQuestion 填空配置） |
 | Codex | 无 SKILL.md 机制：在全局 `~/.codex/AGENTS.md` 追加"遇到图片运行 vision.py"指引（无填空工具，对话式提问） |
 | Z.ai zcode | 复制到 `~/.zcode/skills/image-vision/SKILL.md` 或 `~/.agents/skills/`（不扫 ~/.claude/skills/；支持 AskUserQuestion 填空配置） |
@@ -164,7 +164,7 @@ image-vision-skill/
 ├── vision.py              # 视觉代理脚本（Python 3.7+，零依赖）
 ├── config.example.json    # 配置模板
 ├── index.json             # opencode 远程加载索引
-├── opencode-plugin/       # opencode 兜底插件（自动拦截 read 图片失败并识别）
+├── plugin/               # opencode 兜底插件（自动拦截 read 图片失败并识别）
 ├── install.ps1            # Windows 一键安装脚本
 ├── install.sh             # macOS/Linux 一键安装脚本
 └── install.md             # 详细安装说明

@@ -13,7 +13,7 @@ image-vision/
 ├── vision.py              # 视觉代理脚本（Python 3.7+，零第三方依赖）
 ├── config.example.json    # 配置模板（首次安装时复制为 config.json 并填写）
 ├── index.json             # opencode 远程加载索引
-├── opencode-plugin/       # opencode 兜底插件（自动拦截 read 图片失败并识别）
+├── plugin/               # opencode 兜底插件（自动拦截 read 图片失败并识别）
 ├── install.ps1            # Windows 一键安装脚本
 ├── install.sh             # macOS/Linux 一键安装脚本
 └── install.md             # 本文件

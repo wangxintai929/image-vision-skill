@@ -36,8 +36,8 @@ echo "[opencode] SKILL.md 已安装到 $OPENCODE_SKILL_DIR （重启 opencode �
 # 4. 安装 image-vision-guard 插件到 opencode（工具层面兜底：拦截 read 图片失败并自动识别）
 PLUGIN_DIR="$HOME/.config/opencode/plugin"
 mkdir -p "$PLUGIN_DIR"
-if [ -f "$SRC_DIR/opencode-plugin/image-vision-guard.ts" ]; then
-    cp "$SRC_DIR/opencode-plugin/image-vision-guard.ts" "$PLUGIN_DIR/"
+if [ -f "$SRC_DIR/plugin/image-vision-guard.ts" ]; then
+    cp "$SRC_DIR/plugin/image-vision-guard.ts" "$PLUGIN_DIR/"
     echo "[opencode] 兜底插件已安装到 $PLUGIN_DIR"
 fi
 
