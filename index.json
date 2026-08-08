@@ -1,0 +1,9 @@
+{
+  "skills": [
+    {
+      "name": "image-vision",
+      "version": "1.0.0",
+      "files": ["SKILL.md", "vision.py", "config.example.json"]
+    }
+  ]
+}
