@@ -48,6 +48,35 @@ if (Test-Path (Join-Path $UserHome ".claude")) {
     Write-Host "[claude code] SKILL.md 已安装到 $ClaudeSkillDir"
 }
 
+# 5b. 安装 SKILL.md 到 Z.ai zcode
+$ZcodeSkillDir = Join-Path $UserHome ".zcode\skills\image-vision"
+New-Item -ItemType Directory -Path $ZcodeSkillDir -Force | Out-Null
+Copy-Item (Join-Path $SrcDir "SKILL.md") $ZcodeSkillDir -Force
+Write-Host "[zcode] SKILL.md 已安装到 $ZcodeSkillDir"
+
+# 5c. Codex 无 SKILL.md 机制：向 ~/.codex/AGENTS.md 追加兜底指引（已存在则不重复）
+$CodexDir = Join-Path $UserHome ".codex"
+if (Test-Path $CodexDir) {
+    $CodexAgents = Join-Path $CodexDir "AGENTS.md"
+    if (-not (Test-Path $CodexAgents)) { New-Item -ItemType File -Path $CodexAgents -Force | Out-Null }
+    $CodexContent = Get-Content $CodexAgents -Raw -ErrorAction SilentlyContinue
+    if ($CodexContent -notmatch "(?m)^## image-vision") {
+        $CodexText = @"
+
+## image-vision（图片识别兜底）
+当用户上传/引用图片且你无法直接查看图片时，运行：
+python ~/.config/image-vision/vision.py "<图片路径>" -q "<用户问题>"
+并以脚本输出回答用户。
+"@
+        Add-Content -Path $CodexAgents -Value $CodexText -Encoding UTF8
+        Write-Host "[codex] 已追加 image-vision 指引到 $CodexAgents"
+    } else {
+        Write-Host "[codex] $CodexAgents 已包含 image-vision 指引，跳过"
+    }
+} else {
+    Write-Host "[codex] 未检测到 .codex 目录，跳过（需要时按 install.md 手动追加指引）"
+}
+
 # 6. 验证
 Write-Host ""
 Write-Host "== 验证 =="

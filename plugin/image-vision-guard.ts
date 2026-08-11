@@ -55,7 +55,7 @@ export default (async () => {
         const injection =
           `【系统注入·image-vision】检测到用户上传了 ${paths.length} 张图片，路径：${pathList}。` +
           "当前模型不支持图片输入，必须遵守：1) 禁止用 read/编辑工具直接读取这些图片文件（会报错）；" +
-          `2) 若路径在本地存在，直接执行 python ~/.config/image-vision/vision.py ${paths.map((p) => `"${p}"`).join(" ")} -q "<用户问题原文>"，并以脚本输出作为图片内容回答用户，不做解释；` +
+          `2) 若路径在本地存在，先定位视觉代理脚本 vision.py：优先使用当前 skill 自带的脚本（即 SKILL.md 同目录的 vision.py，按 skill 文件列表路径确认）；若无法确认 skill 自带脚本位置，再检查 ~/.config/image-vision/vision.py 是否存在，存在则用之；都找不到才用搜索工具（glob）定位。然后执行 python "<vision.py 绝对路径>" ${paths.map((p) => `"${p}"`).join(" ")} -q "<用户问题原文>"（图片路径务必加双引号，Windows 下 python 不可用时尝试 py），并以脚本输出作为图片内容回答用户，不做解释；` +
           "3) 若某个路径在本地不存在（图片未保存到磁盘），明确提醒用户“请先将图片保存到本地（如桌面），保存后把路径发我”，禁止搜索或用其他图片代替。"
 
         // 优先追加到用户消息的文本部分；无文本部分则新增一条

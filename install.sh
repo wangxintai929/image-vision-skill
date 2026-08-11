@@ -48,6 +48,32 @@ if [ -d "$HOME/.claude" ]; then
     echo "[claude code] SKILL.md 已安装到 $CLAUDE_SKILL_DIR"
 fi
 
+# 5b. 安装 SKILL.md 到 Z.ai zcode
+ZCODE_SKILL_DIR="$HOME/.zcode/skills/image-vision"
+mkdir -p "$ZCODE_SKILL_DIR"
+cp "$SRC_DIR/SKILL.md" "$ZCODE_SKILL_DIR/"
+echo "[zcode] SKILL.md 已安装到 $ZCODE_SKILL_DIR"
+
+# 5c. Codex 无 SKILL.md 机制：向 ~/.codex/AGENTS.md 追加兜底指引（已存在则不重复）
+if [ -d "$HOME/.codex" ]; then
+    CODEX_AGENTS="$HOME/.codex/AGENTS.md"
+    touch "$CODEX_AGENTS"
+    if ! grep -q "^## image-vision" "$CODEX_AGENTS" 2>/dev/null; then
+        cat >> "$CODEX_AGENTS" <<'EOF'
+
+## image-vision（图片识别兜底）
+当用户上传/引用图片且你无法直接查看图片时，运行：
+python ~/.config/image-vision/vision.py "<图片路径>" -q "<用户问题>"
+并以脚本输出回答用户。
+EOF
+        echo "[codex] 已追加 image-vision 指引到 $CODEX_AGENTS"
+    else
+        echo "[codex] $CODEX_AGENTS 已包含 image-vision 指引，跳过"
+    fi
+else
+    echo "[codex] 未检测到 ~/.codex 目录，跳过（需要时按 install.md 手动追加指引）"
+fi
+
 # 6. 验证
 echo ""
 echo "== 验证 =="

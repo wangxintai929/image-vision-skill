@@ -89,7 +89,7 @@ cp config.example.json config.json
 | `timeout` | 请求超时秒数（默认 120） | `120` |
 | `user_agent` | 自定义 User-Agent（可选，个别服务需要） | 留空 |
 
-配置只读 `config.json` 一个文件，不读取环境变量；`VISION_CONFIG` 环境变量仅用于指定该文件的位置（可选）。
+配置只读 `config.json` 一个文件，不读取环境变量覆盖配置项；`VISION_CONFIG` 环境变量仅用于指定该文件的位置（可选）。脚本按以下顺序查找配置文件：`VISION_CONFIG` 指定路径 → 脚本同目录 `config.json` → `~/.config/image-vision/config.json` → 默认脚本同目录（可通过 `python vision.py --config-path` 查看实际使用的路径）。
 
 ### 示例：opencode-go（无需额外注册）
 
@@ -127,7 +127,7 @@ python ~/.config/image-vision/vision.py "a.png" "b.png" -q "两张图的区别�
 
 | 平台 | 安装方式 |
 |---|---|
-| opencode | `skills.urls` 远程加载，或复制到 `~/.config/opencode/skills/image-vision/`；另装兜底插件（`plugin/image-vision-guard.ts` → `~/.config/opencode/plugin/`），工具层面拦截 read 图片失败并自动识别，不依赖模型自觉 |
+| opencode | `skills.urls` 远程加载，或复制到 `~/.config/opencode/skills/image-vision/`；另装兜底插件（`plugin/image-vision-guard.ts` → `~/.config/opencode/plugin/`），机制层把图片真实路径注入用户消息，不依赖模型自觉 |
 | Claude Code | 复制到 `~/.claude/skills/image-vision/SKILL.md`（支持 AskUserQuestion 填空配置） |
 | Codex | 无 SKILL.md 机制：在全局 `~/.codex/AGENTS.md` 追加"遇到图片运行 vision.py"指引（无填空工具，对话式提问） |
 | Z.ai zcode | 复制到 `~/.zcode/skills/image-vision/SKILL.md` 或 `~/.agents/skills/`（不扫 ~/.claude/skills/；支持 AskUserQuestion 填空配置） |

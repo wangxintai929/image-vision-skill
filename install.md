@@ -48,7 +48,7 @@ cd image-vision
 ./install.sh          # macOS/Linux；Windows 用: powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
-脚本自动完成：复制脚本到 `~/.config/image-vision/`、生成 `config.json`、把 `SKILL.md` 装到 opencode 与 Claude Code 的 skills 目录、执行配置检查。
+脚本自动完成：复制脚本到 `~/.config/image-vision/`、生成 `config.json`、把 `SKILL.md` 装到 opencode / Claude Code / zcode 的 skills 目录、向 Codex 的 `~/.codex/AGENTS.md` 追加兜底指引（若存在）、执行配置检查。
 
 ### 方式三：手动安装
 
@@ -83,7 +83,7 @@ cp config.example.json config.json
 | `timeout` | 请求超时（秒，默认 120） | `120` |
 | `user_agent` | 自定义 User-Agent（可选，个别服务需要） | 留空即可 |
 
-> 配置只读 `config.json` 一个文件（`VISION_CONFIG` 环境变量仅用于指定该文件位置，可选），不读取其他环境变量。
+> 配置只读 `config.json` 一个文件（`VISION_CONFIG` 环境变量仅用于指定该文件位置，可选），不读取其他环境变量覆盖配置项。脚本查找顺序：`VISION_CONFIG` 指定路径 → 脚本同目录 `config.json` → `~/.config/image-vision/config.json` → 默认脚本同目录；可用 `python vision.py --config-path` 查看实际使用的路径。
 
 ### 开箱即用示例：opencode-go（无需额外注册）
 
