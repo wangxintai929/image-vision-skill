@@ -1,9 +1,83 @@
 import type { Plugin } from "@opencode-ai/plugin"
+import crypto from "node:crypto"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
 
 const DEBUG_LOG = path.join(os.homedir(), ".config", "image-vision", "plugin-debug.log")
+// 粘贴图片缓存目录：opencode 粘贴的图片只有 base64（url 字段），filename 常为无效路径，
+// 插件将 base64 解码写入该目录，得到 vision.py 可读的本地文件
+const CACHE_DIR = path.join(os.homedir(), ".config", "image-vision", "cache")
+
+// 单张粘贴图片 base64 解码上限（约 50MB），防止超大附件耗尽内存/磁盘
+const MAX_CACHE_BYTES = 50 * 1024 * 1024
+// 缓存文件保留天数，超出后清理，防止无限积累占用磁盘
+const CACHE_RETENTION_DAYS = 30
+
+const MIME_EXT: Record<string, string> = {
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/bmp": ".bmp",
+  "image/avif": ".avif",
+}
+
+// 常见图片格式的魔数（文件头），用于校验解码结果确为图片
+const MAGIC_BYTES: [number[], string][] = [
+  [[0x89, 0x50, 0x4e, 0x47], "png"],
+  [[0xff, 0xd8, 0xff], "jpg"],
+  [[0x52, 0x49, 0x46, 0x46], "webp"],
+  [[0x47, 0x49, 0x46, 0x38], "gif"],
+  [[0x42, 0x4d], "bmp"],
+]
+
+function extFromMime(mime: string): string {
+  return MIME_EXT[mime] || ".png"
+}
+
+/** 校验 buffer 是否以已知图片格式的魔数开头 */
+function isImageBuffer(buffer: Buffer): boolean {
+  return MAGIC_BYTES.some(([magic]) =>
+    magic.every((byte, i) => buffer[i] === byte),
+  )
+}
+
+/** 清理超过保留天数的缓存文件（每次注入前调用，保持目录有界） */
+function cleanCache(): void {
+  try {
+    if (!fs.existsSync(CACHE_DIR)) return
+    const deadline = Date.now() - CACHE_RETENTION_DAYS * 24 * 60 * 60 * 1000
+    for (const name of fs.readdirSync(CACHE_DIR)) {
+      if (!name.startsWith("paste-")) continue
+      const filePath = path.join(CACHE_DIR, name)
+      const stat = fs.statSync(filePath)
+      if (stat.isFile() && stat.mtimeMs < deadline) fs.unlinkSync(filePath)
+    }
+  } catch {
+    // 清理失败不影响主流程
+  }
+}
+
+/** 将 data URI（data:image/png;base64,...）解码为本地缓存文件，返回文件路径；失败返回 null */
+function cacheDataUri(url: string, mime: string): string | null {
+  const match = /^data:image\/[a-zA-Z0-9.+-]+;base64,(.+)$/s.exec(url)
+  if (!match) return null
+  try {
+    if (match[1].length > MAX_CACHE_BYTES * 1.5) return null // base64 长度上限，提前拒绝超大附件
+    const buffer = Buffer.from(match[1], "base64")
+    if (buffer.length === 0 || buffer.length > MAX_CACHE_BYTES) return null
+    if (!isImageBuffer(buffer)) return null // 解码结果不是有效图片，丢弃
+    fs.mkdirSync(CACHE_DIR, { recursive: true })
+    cleanCache()
+    const hash = crypto.createHash("md5").update(buffer).digest("hex").slice(0, 8)
+    const filePath = path.join(CACHE_DIR, `paste-${Date.now()}-${hash}${extFromMime(mime)}`)
+    fs.writeFileSync(filePath, buffer)
+    return filePath
+  } catch {
+    return null
+  }
+}
 
 function log(message: string): void {
   try {
@@ -46,8 +120,29 @@ export default (async () => {
         )
         if (imageParts.length === 0) continue
 
+        // 为每个图片 part 解析出可用的本地路径：
+        // 1) filename 是绝对路径且文件真实存在 → 直接用
+        // 2) 否则 url（data URI）解码写入缓存目录 → 用缓存路径
+        // 3) 都没有 → 该图无法处理
         const paths = imageParts
-          .map((part) => (typeof part.filename === "string" ? part.filename : ""))
+          .map((part) => {
+            const filename = typeof part.filename === "string" ? part.filename : ""
+            if (filename && path.isAbsolute(filename) && fs.existsSync(filename)) {
+              return filename
+            }
+            const url = typeof (part as { url?: unknown }).url === "string"
+              ? (part as { url: string }).url
+              : ""
+            if (url) {
+              const cached = cacheDataUri(url, part.mime)
+              if (cached) {
+                log(`已缓存粘贴图片: ${cached}`)
+                return cached
+              }
+              log(`粘贴图片缓存失败（url=${url.slice(0, 60)}...）`)
+            }
+            return ""
+          })
           .filter((value) => value.length > 0)
         if (paths.length === 0) continue
 

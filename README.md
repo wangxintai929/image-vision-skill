@@ -8,7 +8,8 @@
 
 - 🖼️ **任意 OpenAI 兼容视觉模型**：OpenAI、DeepSeek、通义千问 Qwen-VL、智谱 GLM-4V、SiliconFlow、本地 vLLM/Ollama 均可
 - 🔄 **跨平台**：opencode / Claude Code / Codex / Z.ai zcode 通用（支持 skills 的平台直接加载，其余用指令文件兜底）
-- ⚙️ **配置灵活**：`config.json` 或环境变量均可，换厂商/换模型只改配置不改代码
+- ⚙️ **配置灵活**：`config.json` 单文件配置（`VISION_CONFIG` 可指定位置），换厂商/换模型只改配置不改代码
+- 📋 **粘贴即识别**（opencode）：直接 Ctrl+V 粘贴的截图由插件自动缓存落盘，无需手动保存文件
 - 🐍 **零依赖**：纯 Python 标准库（urllib + base64），Python 3.7+ 即可运行
 - 📦 **GitHub 远程加载**：opencode 用户一行配置自动安装，改版后自动更新
 
@@ -125,9 +126,11 @@ python ~/.config/image-vision/vision.py "a.png" "b.png" -q "两张图的区别�
 
 ## 平台支持
 
+> **粘贴图片的行为差异**：zcode 粘贴的截图自动缓存到 `~/.zcode/cli/image-cache/`；opencode 由兜底插件缓存到 `~/.config/image-vision/cache/`（30 天自动清理，含敏感信息请勿外发该目录）；Claude Code 粘贴的图片不落盘且模型无法读取内容，需先保存为本地文件再引用。
+
 | 平台 | 安装方式 |
 |---|---|
-| opencode | `skills.urls` 远程加载，或复制到 `~/.config/opencode/skills/image-vision/`；另装兜底插件（`plugin/image-vision-guard.ts` → `~/.config/opencode/plugin/`），机制层把图片真实路径注入用户消息，不依赖模型自觉 |
+| opencode | `skills.urls` 远程加载，或复制到 `~/.config/opencode/skills/image-vision/`；另装兜底插件（`plugin/image-vision-guard.ts` → `~/.config/opencode/plugin/`），机制层把图片真实路径注入用户消息，粘贴的截图（仅有 base64 无有效路径）由插件自动解码缓存到 `~/.config/image-vision/cache/`（保留 30 天自动清理），不依赖模型自觉 |
 | Claude Code | 复制到 `~/.claude/skills/image-vision/SKILL.md`（支持 AskUserQuestion 填空配置） |
 | Codex | 无 SKILL.md 机制：在全局 `~/.codex/AGENTS.md` 追加"遇到图片运行 vision.py"指引（无填空工具，对话式提问） |
 | Z.ai zcode | 复制到 `~/.zcode/skills/image-vision/SKILL.md` 或 `~/.agents/skills/`（不扫 ~/.claude/skills/；支持 AskUserQuestion 填空配置） |
@@ -172,7 +175,7 @@ image-vision-skill/
 ├── vision.py              # 视觉代理脚本（Python 3.7+，零依赖）
 ├── config.example.json    # 配置模板
 ├── index.json             # opencode 远程加载索引
-├── plugin/               # opencode 兜底插件（自动拦截 read 图片失败并识别）
+├── plugin/               # opencode 兜底插件（注入图片路径 + 粘贴图片自动缓存）
 ├── install.ps1            # Windows 一键安装脚本
 ├── install.sh             # macOS/Linux 一键安装脚本
 └── install.md             # 详细安装说明
